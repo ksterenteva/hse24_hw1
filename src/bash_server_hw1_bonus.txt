@@ -1,0 +1,54 @@
+/bin/bash
+
+SEED=214
+THREADS=1
+
+report() {
+    mkdir -p $1_report
+    mkdir $1_report/fastqc
+    fastqc $1/* -o $1_report/fastqc -t $THREADS
+    mkdir $1_report/multiqc
+    multiqc $1_report/fastqc --filename "multiqc_report_$1" --outdir $1_report/multiqc
+}
+
+mkdir -p sub_small
+seqtk sample -s "$SEED" src/pe1.fq 1000000 > sub_small/pe1_sub_small.fq
+seqtk sample -s "$SEED" src/pe2.fq 1000000 > sub_small/pe2_sub_small.fq
+seqtk sample -s "$SEED" src/mp1.fq 500000 > sub_small/mp1_sub_small.fq
+seqtk sample -s "$SEED" src/mp2.fq 500000 > sub_small/mp2_sub_small.fq
+
+report sub_small
+
+mkdir -p trimmed_small
+echo -e "sub_small/pe1_sub_small.fq\nsub_small/pe2_sub_small.fq" > trimmed_small/pe_small.fofn
+echo -e "sub_small/mp1_sub_small.fq\nsub_small/mp2_sub_small.fq" > trimmed_small/mp_small.fofn
+platanus_trim -i trimmed_small/pe_small.fofn -t $THREADS
+platanus_internal_trim -i trimmed_small/mp_small.fofn -t $THREADS
+mv sub_small/*trimmed trimmed_small/
+
+mkdir -p assemble_small
+platanus assemble -o platanus_small -f trimmed_small/*trimmed -t $THREADS
+mv platanus_small* assemble_small/
+
+mkdir -p scaffold_small
+platanus scaffold \
+    -o platanus_small \
+    -c assemble_small/platanus_small_contig.fa \
+    -b assemble_small/platanus_small_contigBubble.fa \
+    -IP1 trimmed_small/*.trimmed \
+    -OP2 trimmed_small/*.int_trimmed \
+    -t $THREADS
+mv platanus_small* scaffold_small/
+
+mkdir -p gap_close_small
+platanus gap_close \
+    -o platanus_small \
+    -c scaffold_small/platanus_small_scaffold.fa \
+    -IP1 trimmed_small/*.trimmed \
+    -OP2 trimmed_small/*.int_trimmed \
+    -t $THREADS
+mv platanus_small* gap_close_small/
+
+
+rm -r ~/sub_small
+rm -r ~/trimmed_small
