@@ -85,6 +85,9 @@ mkdir data
 cp assemble/platanus_contig.fa data/contigs.fasta
 cp gap_close/platanus_gapClosed.fa data/scaffolds.fasta
 fi
+
+rm -r ~/sub
+rm -r ~/trimmed
 ```
 ### Оценим качество исходных чтений и получим по ним общую статистику с помощью программы [fastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) и [multiQC](https://multiqc.info/)
 
@@ -159,7 +162,7 @@ fi
 ![fastqc_per_base_sequence_quality_plot%C2%A0%E2%80%94%20%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F](https://github.com/user-attachments/assets/fd897e07-cbed-46a9-8fd7-41bd58e694ae)
 
 Cреднее качество всех нуклеотидов в каждом риде по позициям является хорошим для всех файлов. Данные **mp1_sub** и **mp2_sub** стали более ровными и высокими, что говорит о том, что тримминг прошел успешно. Данные **pe1_sub и pe2_sub** не изменились по сравнению с тем, что было до тримминга.
-![fastqc_adapter_content_plot%C2%A0%E2%80%94%20%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F](https://github.com/user-attachments/assets/9b5546f9-3b47-48d7-be4d-46cea83de84f)
+![fastqc_adapter_content_plot%C2%A0%E2%80%94%20%D0%BA%D0%BE%D0%BF%D0%B8%D1%8F](https://github.com/ksterenteva/hse24_hw1/blob/012acd0806f49bd67f0ab1f60343090b5d9747ac/src/%D1%81%D0%B1%D0%BE%D1%80%D0%BA%D0%B0%20%D0%B3%D0%B5%D0%BD%D0%BE%D0%BC%D0%B0_%D0%B1%D0%B8%D0%BE%D0%B8%D0%BD%D1%84%D0%B0.ipynb)
 
 По всем остальным параметрам в Multiqc триммированные данные прошли проверки на качества, включая метрику **Adapter Content**, которая позволяет убедиться, что мы успешно смогли избавиться от адаптерных последовательностей для **mp1_sub** и **mp2_sub**
 
@@ -260,6 +263,9 @@ platanus gap_close \
     -OP2 trimmed_small/*.int_trimmed \
     -t $THREADS
 mv platanus_small* gap_close_small/
+
+rm -r ~/sub_small
+rm -r ~/trimmed_small
 ```
 
 ## Оценим качество исходных чтений и получим по ним общую статистику с помощью программы [fastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) и [multiQC](https://multiqc.info/)
